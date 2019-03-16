@@ -1,0 +1,51 @@
+---
+title: "Monitoring forest disturbance using time series MODIS NDVI"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This document is intended to reproduce the research published in Monitoring forest disturbance using time series MODIS NDVI in Michoacán, Mexico 
+
+```{r}
+if (!require("raster")) install.packages("raster")
+library(raster)
+if (!require("bfast")) install.packages("bfast")
+library(bfast)
+if (!require("devtools")) install.packages("devtools")
+library(devtools)
+## for further details see https://github.com/loicdtx/bfastSpatial 
+if (!require("bfastSpatial")) install_github('loicdtx/bfastSpatial')
+library(bfastSpatial)
+```
+
+
+```{r}
+date_NDVI<-readRDS("Input/date.rds")
+NDVI_SG<-brick("Input/NDVI_SG.grd")
+NDVI_SG<-setZ(NDVI_SG,date_NDVI,name="time")
+
+```
+
+
+```{r}
+NDVI_SG
+```
+
+
+```{r}
+h<-10/length(NDVI_SG)
+```
+
+
+```{r}
+bfm0_1 <- bfmSpatial(NDVI_SG,h=h, start=c(2013,1), order=1, mc.cores=8,returnLayers = c("breakpoint", "magnitude", "error"))
+```
+```{r}
+writeRaster(bfm0_1, filename="Output/bfm_13_17.tif", options="INTERLEAVE=BAND", overwrite=TRUE)
+```
+
